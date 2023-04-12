@@ -36,7 +36,63 @@ class CreateCinemaSchema extends Migration
      */
     public function up()
     {
-        throw new \Exception('implement in coding task 4, you can ignore this exception if you are just running the initial migrations.');
+        // Create movies table
+        Schema::create('movies', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('url');
+            $table->timestamps();
+        });
+
+        Schema::create('cinemas', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        // Create bridge table
+        Schema::create('movie_cinemas', function (Blueprint $table) {
+            $table->unsignedBigInteger('movie_id');
+            $table->unsignedBigInteger('cinema_id');
+            $table->dateTime('start_time');
+            $table->dateTime('end_time');
+            $table->timestamps();
+
+            $table->foreign('movie_id')->references('id')->on('movies')->onDelete('cascade');
+            $table->foreign('cinema_id')->references('id')->on('cinemas')->onDelete('cascade');
+        });
+
+        // Create seats table
+        Schema::create('seats', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('cinema_id');
+            $table->timestamps();
+
+            $table->foreign('cinema_id')->references('id')->on('cinemas')->onDelete('cascade');
+        });
+
+        // Create tickets_types table
+        Schema::create('ticket_types', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->integer('amount_percentage');
+            $table->timestamps();
+        });
+
+        // Create movie tickets table
+        Schema::create('movie_tickets', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('movie_id');
+            $table->unsignedBigInteger('cinema_id');
+            $table->unsignedBigInteger('seat_id');
+            $table->unsignedBigInteger('ticket_type_id');
+            $table->timestamps();
+
+            $table->foreign('movie_id')->references('id')->on('movies')->onDelete('cascade');
+            $table->foreign('cinema_id')->references('id')->on('cinemas')->onDelete('cascade');
+            $table->foreign('seat_id')->references('id')->on('seats')->onDelete('cascade');
+            $table->foreign('ticket_type_id')->references('id')->on('ticket_types')->onDelete('cascade');
+        });
     }
 
     /**
@@ -46,5 +102,12 @@ class CreateCinemaSchema extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('movies');
+        Schema::dropIfExists('cinemas');
+        Schema::dropIfExists('movie_cinemas');
+        Schema::dropIfExists('seats');
+        Schema::dropIfExists('tickets');
+        Schema::dropIfExists('ticket_types');
+        Schema::dropIfExists('movie_tickets');
     }
 }
